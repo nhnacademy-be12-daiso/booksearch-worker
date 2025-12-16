@@ -1,0 +1,103 @@
+spring:
+  application:
+    name: booksearch-worker
+
+  rabbitmq:
+    host: ${SPRING_RABBITMQ_HOST}
+    port: ${SPRING_RABBITMQ_PORT}
+    username: ${SPRING_RABBITMQ_USERNAME}
+    password: ${SPRING_RABBITMQ_PASSWORD}
+    listener:
+      simple:
+        acknowledge-mode: auto
+        prefetch: ${RABBITMQ_PREFETCH:10}
+        default-requeue-rejected: false
+
+  elasticsearch:
+    uris: ${SPRING_ELASTICSEARCH_URIS:http://s4.java21.net:9200}
+    username: ${SPRING_ELASTICSEARCH_USERNAME:elastic}
+    password: ${SPRING_ELASTICSEARCH_PASSWORD}
+    socket-timeout: 60s
+    connection-timeout: 5s
+
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:s4.java21.net}
+      port: ${SPRING_REDIS_PORT:6379}
+      password: ${SPRING_REDIS_PASSWORD}
+      database: ${SPRING_REDIS_DATABASE:379}
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+
+
+server:
+  port: ${SERVER_PORT:0}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    register-with-eureka: ${EUREKA_REGISTER:true}
+    fetch-registry: ${EUREKA_FETCH:true}
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE}
+
+rabbitmq:
+  exchange:
+    name: team3.booksearch.exchange
+
+  routing:
+    key: team3.booksearch.ai.analysis
+
+  queue:
+    name: team3.booksearch.ai.analysis.queue.v1
+
+  retry:
+    exchange:
+      name: team3.booksearch.ai.analysis.retry.exchange.v1
+    routing:
+      key: team3.booksearch.ai.analysis.retry.v1
+    queue:
+      name: team3.booksearch.ai.analysis.retry.queue.v1
+    delay-ms: 10000
+    max-attempts: 3
+
+  dlx:
+    name: team3.booksearch.ai.analysis.dlx
+  dlq:
+    name: team3.booksearch.ai.analysis.dlq
+  dlq-routing:
+    key: team3.booksearch.ai.analysis.dlq
+
+app:
+  ai:
+    embedding-url: http://ollama.java21.net/api/embeddings
+    reranker-url: http://reranker.java21.net/rerank
+    gemini-api-key: AIzaSyAPjRTWLiLXhJBCiCKoCNi3aPVMNGkU4go
+    gemini-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+  batch:
+    size: 1000
+
+logging:
+  level:
+    org.springframework.amqp: INFO
+    org.springframework.amqp.rabbit.listener: INFO
+    org.springframework.web.reactive.function.client: INFO
