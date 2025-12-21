@@ -46,10 +46,17 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health
   endpoint:
     health:
       show-details: always
+  tracing:
+    enabled: false
+  zipkin:
+    tracing:
+      export:
+        enabled: false
+      endpoint: http://localhost:9411/api/v2/spans
 
 eureka:
   instance:
@@ -62,34 +69,34 @@ eureka:
 
 rabbitmq:
   exchange:
-    name: team3.booksearch.exchange
-
-  routing:
-    key: team3.booksearch.ai.analysis
+    main: team3.booksearch.exchange
+    retry: team3.booksearch.retry.dlx
+    dlx: team3.booksearch.dlx
 
   queue:
-    name: team3.booksearch.ai.analysis.queue.v1
+    ai-analysis: team3.booksearch.ai.analysis.queue
+    book-upsert: team3.booksearch.book.upsert.queue
+    book-delete: team3.booksearch.book.delete.queue
 
-  retry:
-    exchange:
-      name: team3.booksearch.ai.analysis.retry.exchange.v1
-    routing:
-      key: team3.booksearch.ai.analysis.retry.v1
-    queue:
-      name: team3.booksearch.ai.analysis.retry.queue.v1
-    delay-ms: 10000
-    max-attempts: 3
+  routing-key:
+    ai-analysis-retry: team3.booksearch.ai.analysis.retry
+    ai-analysis-fail: team3.booksearch.ai.analysis.fail
 
-  dlx:
-    name: team3.booksearch.ai.analysis.dlx
-  dlq:
-    name: team3.booksearch.ai.analysis.dlq
-  dlq-routing:
-    key: team3.booksearch.ai.analysis.dlq
+    book-upsert-retry: team3.booksearch.book.upsert.retry
+    book-upsert-fail: team3.booksearch.book.upsert.fail
+
+    book-delete-retry: team3.booksearch.book.delete.retry
+    book-delete-fail: team3.booksearch.book.delete.fail
+
+
+booksearch:
+  es:
+    index: books
 
 app:
   ai:
     embedding-url: http://ollama.java21.net/api/embeddings
+    embedding-model: bge-m3
     reranker-url: http://reranker.java21.net/rerank
     gemini-api-key: AIzaSyAPjRTWLiLXhJBCiCKoCNi3aPVMNGkU4go
     gemini-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
