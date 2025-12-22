@@ -1,6 +1,6 @@
 spring:
   application:
-    name: booksearch-worker
+    name: team3-booksearch-worker
 
   rabbitmq:
     host: ${SPRING_RABBITMQ_HOST}
@@ -16,7 +16,7 @@ spring:
   elasticsearch:
     uris: ${SPRING_ELASTICSEARCH_URIS:http://s4.java21.net:9200}
     username: ${SPRING_ELASTICSEARCH_USERNAME:elastic}
-    password: ${SPRING_ELASTICSEARCH_PASSWORD}
+    password: ${SPRING_ELASTICSEARCH_PASSWORD:nhnacademy123!}
     socket-timeout: 60s
     connection-timeout: 5s
 
