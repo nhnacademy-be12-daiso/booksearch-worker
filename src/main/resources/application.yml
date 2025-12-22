@@ -40,7 +40,7 @@ spring:
 
 
 server:
-  port: ${SERVER_PORT:0}
+  port: ${SERVER_PORT}
 
 management:
   endpoints:
