@@ -70,20 +70,9 @@ public class AiAnalysisConsumer {
                 }
             }
 
-            // 2. Gemini 호출 (여기에 429 특수 처리 로직 추가)
             Map<String, GeminiAiClient.AiResult> aiResults;
-            try {
-                aiResults = gemini.analyzeBulk(booksToSend);
-            } catch (GeminiQuotaException qe) {
-                // [특수 케이스] 429 오류 발생 -> 24시간 뒤 재시도
-                log.warn("[AI Batch] 🚨 Gemini Quota Exceeded! Re-scheduling for 24h. requestId={}", msg.requestId());
+            aiResults = gemini.analyzeBulk(booksToSend);
 
-                // 횟수(retryCount)를 1로 고정하여 DLQ로 넘어가지 않게 함 (무한 대기)
-                retryPublisher.publishToRetryWithDelay(amqpMessage, RK_RETRY, 1, QUOTA_RESET_DELAY_MS);
-
-                channel.basicAck(deliveryTag, false);
-                return; // 여기서 종료
-            }
 
             // 3. 결과 업데이트
             for (GeminiAiClient.BookInfo book : booksToSend) {
