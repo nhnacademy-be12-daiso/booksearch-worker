@@ -1,6 +1,14 @@
+server:
+  port: 8089
+
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
+
 spring:
   application:
-    name: booksearch-worker
+    name: team3-booksearch-worker
 
   rabbitmq:
     host: s4.java21.net
