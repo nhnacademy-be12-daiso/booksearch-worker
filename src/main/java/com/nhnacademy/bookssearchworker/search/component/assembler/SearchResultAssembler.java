@@ -19,7 +19,7 @@ import java.util.Map;
 public class SearchResultAssembler {
 
     private final BookMapper bookMapper;
-    private static final int FINAL_RESULT_SIZE = 30;
+    private static final int FINAL_RESULT_SIZE = 50;
 
     // 1. 일반 검색 결과 조립
     public SearchResponseDto assembleBasicResult(List<Book> books) {
@@ -32,7 +32,7 @@ public class SearchResultAssembler {
 
     // 2. AI 검색 결과 조립 (리랭킹 + AI 분석 병합)
     public SearchResponseDto assembleAiResult(List<BookWithScore> rankedBooks, Map<String, AiResultDto> aiAnalysis) {
-        // 상위 30개 자르기
+        // 상위 50개 자르기
         List<Book> targetBooks = rankedBooks.stream()
                 .limit(FINAL_RESULT_SIZE)
                 .map(BookWithScore::book)

@@ -46,6 +46,7 @@ public class BookRepository {
             boolean useVector = (vector != null && !vector.isEmpty());
 
             SearchResponse<Book> response = esClient.search(s -> {
+                s.size(size);
                 s.index(INDEX_NAME);
 
                 // [Smart Logic] 벡터가 있을 때만 KNN 절을 추가함

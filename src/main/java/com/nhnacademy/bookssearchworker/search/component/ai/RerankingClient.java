@@ -22,6 +22,7 @@ public class RerankingClient {
             List<String> docTexts = candidates.stream()
                     .map(b -> b.getTitle() + " " + stripHtml(b.getDescription()))
                     .toList();
+            log.info("[RerankingClient] 리랭킹 요청. Query: {}, Docs: {}", query, docTexts);
             return aiClient.rerank(query, docTexts);
         } catch (Exception e) {
             log.error("[RerankingClient] 리랭킹 실패. Query: {}", query, e);
@@ -32,6 +33,7 @@ public class RerankingClient {
     // 간단한 문자열 처리는 private으로 내부에 둠
     private String stripHtml(String html) {
         if (html == null) return "";
-        return html.replaceAll("<[^>]*>", "").substring(0, Math.min(html.length(), 50));
+        String stripped = html.replaceAll("<[^>]*>", "");
+        return stripped.substring(0, Math.min(stripped.length(), 50));
     }
 }

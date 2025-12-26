@@ -49,9 +49,13 @@ public class SearchService {
     public SearchResponseDto aiSearch(String userQuery) {
         String cacheKey = keyGenerator.generateKey("ai", userQuery);
         SearchResponseDto cached = redisCacheService.get(cacheKey, SearchResponseDto.class);
-        if (cached != null) return cached;
+        if (cached != null) {
+            log.debug("[AiSearch] 캐시 히트. key={}", cacheKey);
+            return cached;
+        }
 
         String refinedQuery = queryPreprocessor.extractKeywords(userQuery);
+        log.info("[AiSearch] 정제된 쿼리: {}", refinedQuery);
 
         // 1) 임베딩 생성: 실패하면 벡터 검색을 제외하고 키워드 검색만 수행
         List<Float> embedding;
@@ -66,6 +70,7 @@ public class SearchService {
         List<Book> candidates;
         try {
             candidates = elasticsearchEngine.search(refinedQuery, embedding);
+            log.info("[AiSearch] Elasticsearch 검색 결과 수: {}", candidates.size());
         } catch (Exception e) {
             log.error("[Search] Elasticsearch 검색 실패: query='{}'", refinedQuery, e);
             throw e;
@@ -81,6 +86,7 @@ public class SearchService {
 
             // 점수 반영
             rankedBooks = assembler.applyRerankScores(candidates, scores, RERANK_LIMIT);
+            log.info("[AiSearch] 리랭킹 완료. 상위 권 점수 반영됨.");
 
         } catch (Exception e) {
             log.warn("[Fallback] 리랭킹 서버 통신 실패 -> 리랭킹 없이 다음 단계로 진행합니다. msg={}", e.getMessage());
@@ -108,18 +114,28 @@ public class SearchService {
 
         // 5) 최종 조립 및 캐싱(AI 검색만 캐싱)
         SearchResponseDto result = assembler.assembleAiResult(rankedBooks, aiAnalysis);
-        redisCacheService.save(cacheKey, result, Duration.ofHours(12));
+        if(!aiAnalysis.isEmpty()) {
+            // AI 분석이 포함된 경우에만 캐싱
+            redisCacheService.save(cacheKey, result, Duration.ofHours(12));
+            log.info("[AiSearch] 결과 캐싱 완료. key={}", cacheKey);
+        }
+        else {
+            log.info("[AiSearch] AI 분석 없음 -> 캐싱 생략");
+        }
 
         return result;
     }
 
     // 일반 검색: 하이브리드 검색만 수행 (캐싱 없음)
     public SearchResponseDto basicSearch(String userQuery) {
+        // ISBN 전용 검색
         if (userQuery.matches("^[0-9-]+$")) {
+            log.info("[BasicSearch] ISBN 전용 검색 수행: {}", userQuery);
             return assembler.assembleBasicResult(elasticsearchEngine.searchByIsbn(userQuery));
         }
 
         String refinedQuery = queryPreprocessor.extractKeywords(userQuery);
+        log.info("[BasicSearch] 정제된 쿼리: {}", refinedQuery);
 
         List<Float> embedding;
         try {
@@ -132,6 +148,7 @@ public class SearchService {
         List<Book> books;
         try {
             books = elasticsearchEngine.search(refinedQuery, embedding);
+            log.info("[BasicSearch] Elasticsearch 검색 결과 수: {}", books.size());
         } catch (Exception e) {
             log.error("[Search] Elasticsearch 검색 실패: query='{}'", refinedQuery, e);
             throw e;
