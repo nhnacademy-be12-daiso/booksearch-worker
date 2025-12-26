@@ -52,19 +52,26 @@ public class SearchResultAssembler {
 
     // 3. 리랭킹 점수 매핑 로직 (복잡한 스트림 로직 격리)
     public List<BookWithScore> applyRerankScores(List<Book> original, List<Map<String, Object>> scores, int limit) {
-        List<BookWithScore> result = new ArrayList<>();
+        int target = Math.min(original.size(), limit);
+        List<BookWithScore> result = new ArrayList<>(original.size());
 
-        // 점수 있는 애들 매핑
-        for (int i = 0; i < scores.size() && i < limit; i++) {
-            double score = (scores.get(i).get("score") instanceof Number n) ? n.doubleValue() : 0.0;
+        // 상위 target권은 score 있으면 반영, 없으면 0점
+        for (int i = 0; i < target; i++) {
+            double score = 0.0;
+            if (scores != null && i < scores.size()) {
+                Object v = scores.get(i).get("score");
+                if (v instanceof Number n) score = n.doubleValue();
+            }
             result.add(new BookWithScore(original.get(i), score));
         }
 
-        // 점수 없는 나머지 애들 매핑 (0점 처리)
-        original.stream().skip(limit).forEach(b -> result.add(new BookWithScore(b, 0.0)));
+        // 나머지는 0점 처리
+        for (int i = target; i < original.size(); i++) {
+            result.add(new BookWithScore(original.get(i), 0.0));
+        }
 
-        // 점수순 정렬
         result.sort(Comparator.comparingDouble(BookWithScore::score).reversed());
         return result;
     }
+
 }

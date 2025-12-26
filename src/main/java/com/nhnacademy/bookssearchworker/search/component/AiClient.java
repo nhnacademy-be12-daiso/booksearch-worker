@@ -81,7 +81,7 @@ public class AiClient {
             }
             return "{}";
         } catch (Exception e) {
-            log.warn("[AiClient] Gemini 응답 오류. AI 추천 없이 진행.");
+            log.warn("[AiClient] Gemini 응답 지연 또는 오류. AI 추천 없이 진행.: {}", e.getMessage());
             return "{}";
         }
     }

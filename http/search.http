@@ -1,5 +1,5 @@
 ### 기본 검색
-GET http://localhost:8089/api/books/search?query=C언어 기초
+GET http://localhost:8089/api/search/basic?query=최신 기술 동향
 
 ### AI 검색
-GET http://localhost:8089/api/books/ai-search?query=C언어 심화 공부하기 좋은책 추천해줘
+GET http://localhost:8089/api/search/ai?query=인공지능을 활용한 최신 기술 동향

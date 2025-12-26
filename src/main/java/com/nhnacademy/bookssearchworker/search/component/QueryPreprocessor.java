@@ -22,8 +22,8 @@ public class QueryPreprocessor {
     public String extractKeywords(String sentence) {
         if (sentence == null || sentence.isBlank()) return "";
 
-        // 🔥 [1단계] 중요 키워드 대소문자 교정 (Dictionary Correction)
-        // 사용자가 "c언어", "sql" 이라고 쳐도 -> "C언어", "SQL"로 바꿔줌
+        // 1) 자주 들어오는 기술 키워드의 대소문자/표기 보정 (예: c언어 -> C언어, sql -> SQL)
+        // 입력이 제각각이어도 검색 품질이 크게 흔들리지 않게 하기 위함
         String fixedQuery = fixCapitalization(sentence);
 
         // [2단계] 불용어 제거 (기존 로직)

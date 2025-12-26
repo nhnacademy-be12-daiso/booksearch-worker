@@ -29,8 +29,7 @@ public class LlmAnalysisClient {
             String rawResponse = aiClient.generateAnswer(prompt);
 
             if (rawResponse == null || rawResponse.isBlank() || rawResponse.equals("{}")) {
-                // 빈 응답이 오면 로그를 남겨서 알 수 있게 함
-                log.warn("⚠️ Gemini가 분석 결과로 빈 JSON({})을 반환했습니다. (모든 책이 기준 미달로 판단됨)");
+                log.warn("Gemini가 분석 결과로 빈 JSON을 반환했습니다.");
                 return Collections.emptyMap();
             }
 
@@ -51,33 +50,35 @@ public class LlmAnalysisClient {
 
         for (Book book : books) {
             String desc = SearchUtils.stripHtml(book.getDescription());
-            if (desc.length() > 150) desc = desc.substring(0, 150);
+            if (desc.length() > 150) desc = desc.substring(0, 50);
 
             bookInfo.append(String.format("| ISBN: %s | 제목: %s | 설명: %s... |\n",
                     book.getIsbn(), book.getTitle(), desc));
         }
 
         return String.format("""
-질문: "%s"
-위 목록(총 %d권)을 분석해.
+                질문: "%s"
+                위 목록(총 %d권)을 분석해.
 
-[규칙]
-1. matchRate: 질문 관련성(0~99). 관련이 거의 없으면 10을 기본으로 줄 것.
-2. reason: 질문('%s')과의 연결고리를 분명히 하여 '왜 이 책을 추천하는지' 핵심 근거를 설명한 문장(한국어, 100자 이내, 줄바꿈 금지).
-3. 모든 책을 포함해서 각각에 대해 작성할 것. 점수가 낮아도 절대 제외하지 말 것.
-4. 결과는 JSON 포맷만 반환. 값은 다음 스키마를 따를 것: key는 ISBN, value는 { "reason": "...", "matchRate": NN }.
+                [규칙]
+                1. **matchRate**: 질문 관련성(0~99). 관련 없으면 최소 10점을 줄 것.
+                2. **reason**: **장점/단점 없이**, 오직 질문에 맞춘 '추천 이유'만 작성할 것.
+                   - **하나의 문자열**로 반환할 것.
+                   - 길이는 **100~150자**로 제한할 것.
+                   - 질문('%s')과의 연결고리를 반드시 포함할 것.
+                3. 🔥 **중요: 점수가 낮아도 절대 제외하지 말고, 목록에 있는 모든 책을 포함할 것.**
+                4. 결과는 **JSON** 포맷만 반환.
 
-[도서 목록]
-%s
+                [도서 목록]
+                %s
 
-[예시]
-{
-  "9791162244222": {
-    "reason": "실무 예제가 많아 질문 실무적용에 도움",
-    "matchRate": 95
-  }
-}
-""", userQuery, books.size(), userQuery, bookInfo.toString());
+                [JSON 반환 예시]
+                {
+                  "9791162244222": {
+                    "reason": "질문과 직접 연결되는 추천 이유(100~150자). 예: 사용자의 요구를 충족하는 실무 중심 예제와 최신 사례를 제공하여 빠른 적용이 가능함.",
+                    "matchRate": 95
+                  }
+                }
+                """, userQuery, books.size(), userQuery, bookInfo.toString());
     }
-
 }

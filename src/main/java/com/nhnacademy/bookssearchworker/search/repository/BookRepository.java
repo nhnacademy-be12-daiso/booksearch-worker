@@ -31,7 +31,7 @@ public class BookRepository {
                     .query(q -> q.term(t -> t.field("isbn").value(isbn))), Book.class);
             return extractHits(response);
         } catch (IOException e) {
-            log.error("❌ [Repository] ISBN 조회 실패: isbn={}", isbn, e);
+            log.error(" [Repository] ISBN 조회 실패: isbn={}", isbn, e);
             return Collections.emptyList();
         }
     }
@@ -91,38 +91,8 @@ public class BookRepository {
             return extractHits(response);
 
         } catch (IOException e) {
-            log.error("❌ [Repository] 하이브리드 검색 실패: query={}", query, e);
+            log.error(" [Repository] 하이브리드 검색 실패: query={}", query, e);
             return Collections.emptyList();
-        }
-    }
-
-    /**
-     * 3. 도서 저장 (Insert & Update)
-     */
-    public boolean save(Book book) {
-        try {
-            // Elasticsearch는 id가 같으면 덮어쓰기(Update)가 됨
-            esClient.index(i -> i.index(INDEX_NAME).id(book.getIsbn()).document(book));
-            return true;
-        } catch (IOException e) {
-            // ❗배포 환경에서 서비스 전체가 멈추지 않도록 여기서 throw 하지 않음
-            log.error("❌ [Repository] 도서 저장 실패: isbn={}", book.getIsbn(), e);
-            return false;
-        }
-    }
-
-    /**
-     * 4. 도서 삭제
-     */
-    public boolean deleteById(String isbn) {
-        try {
-            esClient.delete(d -> d.index(INDEX_NAME).id(isbn));
-            log.info("🗑️ [Repository] 도서 삭제 완료: isbn={}", isbn);
-            return true;
-        } catch (IOException e) {
-            // ❗배포 환경에서 서비스 전체가 멈추지 않도록 여기서 throw 하지 않음
-            log.error("❌ [Repository] 도서 삭제 실패: isbn={}", isbn, e);
-            return false;
         }
     }
 
