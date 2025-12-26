@@ -19,6 +19,7 @@ public class EmbeddingClient {
         try {
             List<Double> embedding = aiClient.generateEmbedding(text);
             if (embedding == null || embedding.isEmpty()) return Collections.emptyList();
+            log.info("[EmbeddingClient] 임베딩 생성 성공. Query: {}, Embedding: {}...", text, embedding.subList(0, Math.min(5, embedding.size())));
             return embedding.stream().map(Double::floatValue).toList();
         } catch (Exception e) {
             // 여기서 로그를 남기고 상위로 예외를 던짐

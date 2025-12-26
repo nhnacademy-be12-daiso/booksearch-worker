@@ -65,14 +65,10 @@ rabbitmq:
     retry: team3.booksearch.retry.dlx
     dlx: team3.booksearch.dlx
   queue:
-    ai-analysis: team3.booksearch.ai.analysis.queue
     book-upsert: team3.booksearch.book.upsert.queue
     book-delete: team3.booksearch.book.delete.queue
 
   routing-key:
-    ai-analysis-retry: team3.booksearch.ai.analysis.retry
-    ai-analysis-fail: team3.booksearch.ai.analysis.fail
-
     book-upsert-retry: team3.booksearch.book.upsert.retry
     book-upsert-fail: team3.booksearch.book.upsert.fail
 

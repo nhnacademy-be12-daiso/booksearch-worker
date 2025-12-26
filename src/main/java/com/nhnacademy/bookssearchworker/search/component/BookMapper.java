@@ -50,9 +50,11 @@ public class BookMapper {
 
                 // 멘트 설정
                 dto.setAiAnswer(res.reason());
+
+                log.info("[BookMapper] AI 분석 결과 적용. ISBN: {}, MatchRate: {}, Reason: {}",
+                        dto.getIsbn(), res.matchRate(), res.reason());
             }
             else {
-                log.warn("AI 평가 결과에 도서 정보가 없습니다. ISBN: {}", dto.getIsbn());
                 dto.setAiAnswer(null);
                 // matchRate는 리랭킹 점수(또는 0점)를 유지
             }

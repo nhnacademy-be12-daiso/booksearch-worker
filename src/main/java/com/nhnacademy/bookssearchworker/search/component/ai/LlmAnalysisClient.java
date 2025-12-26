@@ -3,7 +3,6 @@ package com.nhnacademy.bookssearchworker.search.component.ai;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nhnacademy.bookssearchworker.search.component.AiClient;
-import com.nhnacademy.bookssearchworker.search.config.SearchUtils;
 import com.nhnacademy.bookssearchworker.search.domain.Book;
 import com.nhnacademy.bookssearchworker.search.dto.AiResultDto;
 import com.nhnacademy.bookssearchworker.search.exception.LlmAnalysisException;
@@ -32,6 +31,7 @@ public class LlmAnalysisClient {
                 log.warn("Gemini가 분석 결과로 빈 JSON을 반환했습니다.");
                 return Collections.emptyMap();
             }
+            log.info("[LlmAnalysisClient] 도서 분석 성공. Query: {}", userQuery);
 
             String jsonResponse = rawResponse
                     .replaceAll("```json", "")
@@ -49,8 +49,8 @@ public class LlmAnalysisClient {
         StringBuilder bookInfo = new StringBuilder();
 
         for (Book book : books) {
-            String desc = SearchUtils.stripHtml(book.getDescription());
-            if (desc.length() > 150) desc = desc.substring(0, 50);
+            String desc = stripHtml(book.getDescription());
+            if (desc.length() > 150) desc = desc.substring(0, 150);
 
             bookInfo.append(String.format("| ISBN: %s | 제목: %s | 설명: %s... |\n",
                     book.getIsbn(), book.getTitle(), desc));
@@ -66,7 +66,7 @@ public class LlmAnalysisClient {
                    - **하나의 문자열**로 반환할 것.
                    - 길이는 **100~150자**로 제한할 것.
                    - 질문('%s')과의 연결고리를 반드시 포함할 것.
-                3. 🔥 **중요: 점수가 낮아도 절대 제외하지 말고, 목록에 있는 모든 책을 포함할 것.**
+                3. **중요: 점수가 낮아도 절대 제외하지 말고, 목록에 있는 모든 책을 포함할 것.**
                 4. 결과는 **JSON** 포맷만 반환.
 
                 [도서 목록]
@@ -80,5 +80,12 @@ public class LlmAnalysisClient {
                   }
                 }
                 """, userQuery, books.size(), userQuery, bookInfo.toString());
+    }
+
+    private String stripHtml(String html) {
+        if (html == null) return "";
+        // 간단한 HTML 태그 제거
+        String stripped = html.replaceAll("<[^>]*>", "");
+        return stripped.substring(0, Math.min(stripped.length(), 150));
     }
 }
