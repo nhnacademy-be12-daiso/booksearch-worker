@@ -32,7 +32,7 @@ public class EsBookDocumentClient {
     }
 
     public void updateById(String isbnId, Object partialDoc) throws Exception {
-        // ✅ doc/doc_as_upsert JSON 확정
+        // doc/doc_as_upsert JSON 확정
         String body = om.writeValueAsString(new UpdateRequest(partialDoc, true));
 
         Request req = new Request("POST", "/" + index + "/_update/" + isbnId);

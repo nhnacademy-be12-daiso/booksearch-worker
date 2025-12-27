@@ -30,7 +30,7 @@ public class OllamaEmbeddingClient {
     public List<Float> embed(String text) {
         if (text == null) text = "";
 
-        // ✅ Ollama embeddings는 prompt 키가 맞는 환경
+        // Ollama embeddings는 prompt 키가 맞는 환경
         Map<String, Object> body = Map.of(
                 "model", model,
                 "prompt", text
@@ -51,7 +51,7 @@ public class OllamaEmbeddingClient {
 
         List<Float> vec = parseEmbedding(resp);
 
-        // ✅ 길이 검증 (여기서 걸러서 ES 400 재시도 지옥 방지)
+        // 길이 검증 (여기서 걸러서 ES 400 재시도 지옥 방지)
         if (vec == null || vec.isEmpty()) {
             throw new IllegalStateException("embedding is empty");
         }
