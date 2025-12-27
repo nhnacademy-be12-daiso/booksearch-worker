@@ -26,4 +26,13 @@ public class BookResponseDto {
     private String AiAnswer;
     @Setter
     private Integer matchRate;
+
+    @Setter
+    private Integer discountedPrice;
+
+    @Setter
+    private Long publisherId;
+
+    @Setter
+    private Long categoryId;
 }

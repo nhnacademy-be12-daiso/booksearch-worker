@@ -28,6 +28,8 @@ public class BookMapper {
                 .price(book.getPrice())
                 .categories(book.getCategories())
                 .matchRate(matchRate)
+                .publisherId(book.getPublisherId())
+                .categoryId(book.getCategoryId())
                 .build();
     }
 

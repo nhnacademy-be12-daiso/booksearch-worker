@@ -16,7 +16,6 @@ public class ElasticsearchEngine {
     private static final int DEFAULT_FETCH_SIZE = 50;
 
     public List<Book> search(String query, List<Float> embedding) {
-        // embedding이 null이면 Repository에서 키워드 검색만 수행하도록 구현되어 있다고 가정
         List<Book> candidates = bookRepository.searchHybrid(query, embedding, DEFAULT_FETCH_SIZE);
         return candidates == null ? Collections.emptyList() : candidates;
     }

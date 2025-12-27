@@ -6,6 +6,7 @@ import com.nhnacademy.bookssearchworker.search.dto.AiResultDto;
 import com.nhnacademy.bookssearchworker.search.dto.BookResponseDto;
 import com.nhnacademy.bookssearchworker.search.dto.BookWithScore;
 import com.nhnacademy.bookssearchworker.search.dto.SearchResponseDto;
+import com.nhnacademy.bookssearchworker.search.service.DiscountPolicyService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,7 @@ import java.util.Map;
 public class SearchResultAssembler {
 
     private final BookMapper bookMapper;
+    private final DiscountPolicyService discountPolicyService;
     private static final int FINAL_RESULT_SIZE = 50;
 
     // 1. 일반 검색 결과 조립
@@ -27,6 +29,8 @@ public class SearchResultAssembler {
                 .limit(FINAL_RESULT_SIZE)
                 .map(b -> bookMapper.toDto(b, 50)) // 기본 점수 50
                 .toList();
+
+        discountPolicyService.applyDiscounts(dtos);
         return SearchResponseDto.builder().bookList(dtos).build();
     }
 
@@ -44,13 +48,15 @@ public class SearchResultAssembler {
         // AI 결과 매핑 (Mapper 위임)
         bookMapper.applyAiEvaluation(dtos, aiAnalysis);
 
+        discountPolicyService.applyDiscounts(dtos);
+
         // 최종 정렬 (점수 높은 순)
         dtos.sort(Comparator.comparingInt(BookResponseDto::getMatchRate).reversed());
 
         return SearchResponseDto.builder().bookList(dtos).build();
     }
 
-    // 3. 리랭킹 점수 매핑 로직 (복잡한 스트림 로직 격리)
+    // 3. 리랭킹 점수 매핑 로직
     public List<BookWithScore> applyRerankScores(List<Book> original, List<Map<String, Object>> scores, int limit) {
         int target = Math.min(original.size(), limit);
         List<BookWithScore> result = new ArrayList<>(original.size());

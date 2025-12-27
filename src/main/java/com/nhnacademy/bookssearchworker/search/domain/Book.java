@@ -1,5 +1,6 @@
 package com.nhnacademy.bookssearchworker.search.domain;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -67,4 +68,14 @@ public class Book {
     @Field(name = "image_url", type = FieldType.Keyword, index = false)
     @JsonProperty("image_url") // Jackson이 JSON 파싱할 때도 인식하게 함
     private String imageUrl;
+
+    @Field(name = "publisherId", type = FieldType.Long)
+    @JsonProperty("publisherId")
+    @JsonAlias({"publisher_id"})
+    private Long publisherId;
+
+    @Field(name = "categoryId", type = FieldType.Long)
+    @JsonProperty("categoryId")
+    @JsonAlias({"category_id"})
+    private Long categoryId;
 }
