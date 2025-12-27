@@ -8,12 +8,14 @@ import java.util.List;
  */
 public record BookUpsertDoc(
         String isbn,
+        Long id,
         String title,
         String author,
         String publisher,
         String description,
         LocalDate pubDate,
         Integer price,
+        List<String> categories,
         String image_url,
         List<Float> embedding
 ) {}

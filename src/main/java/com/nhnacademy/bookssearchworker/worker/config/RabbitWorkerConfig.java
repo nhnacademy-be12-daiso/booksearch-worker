@@ -3,9 +3,11 @@ package com.nhnacademy.bookssearchworker.worker.config;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.amqp.core.AcknowledgeMode;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.amqp.support.converter.Jackson2JavaTypeMapper;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
@@ -19,7 +21,13 @@ public class RabbitWorkerConfig {
         ObjectMapper om = new ObjectMapper();
         om.registerModule(new JavaTimeModule());
         om.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        return new Jackson2JsonMessageConverter(om);
+
+        Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter(om);
+
+        // 리스너 메서드 파라미터 타입 기준으로 역직렬화
+        converter.setTypePrecedence(Jackson2JavaTypeMapper.TypePrecedence.INFERRED);
+
+        return converter;
     }
 
     @Bean
@@ -29,11 +37,6 @@ public class RabbitWorkerConfig {
         return template;
     }
 
-    /**
-     * 컨슈머에서 직접 ACK/NACK를 결정하기 위해 MANUAL ACK 사용.
-     * - 우리는 실패 시 "재시도 큐로 재발행" or "DLQ로 재발행" 후 ACK 해버려서
-     *   같은 메시지가 무한 재큐잉 되지 않게 한다.
-     */
     @Bean(name = "rabbitListenerContainerFactory")
     public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(
             ConnectionFactory connectionFactory,
@@ -42,7 +45,7 @@ public class RabbitWorkerConfig {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(messageConverter);
-        factory.setAcknowledgeMode(org.springframework.amqp.core.AcknowledgeMode.MANUAL);
+        factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
         factory.setDefaultRequeueRejected(false);
         return factory;
     }

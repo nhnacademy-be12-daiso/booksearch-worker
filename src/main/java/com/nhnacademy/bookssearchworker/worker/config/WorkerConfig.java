@@ -29,11 +29,6 @@ public class WorkerConfig {
     }
 
     @Bean
-    public Jackson2JsonMessageConverter jackson2JsonMessageConverter(ObjectMapper objectMapper) {
-        return new Jackson2JsonMessageConverter(objectMapper);
-    }
-
-    @Bean
     public WebClient webClient() {
         ConnectionProvider provider = ConnectionProvider.builder("custom-provider")
                 .maxConnections(20)
