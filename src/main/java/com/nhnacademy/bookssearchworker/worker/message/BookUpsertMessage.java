@@ -19,6 +19,8 @@ public record BookUpsertMessage(
             LocalDate pubDate,
             Integer price,
             List<String> categories,
-            String imageUrl
+            String imageUrl,
+            Long publisherId,
+            Long categoryId
     ) {}
 }
