@@ -97,6 +97,8 @@ public class BookUpsertConsumer {
                     book.price(),
                     book.categories(),
                     book.imageUrl(),
+                    book.publisherId(),
+                    book.categoryId(),
                     vec
             );
 

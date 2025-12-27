@@ -17,5 +17,7 @@ public record BookUpsertDoc(
         Integer price,
         List<String> categories,
         String image_url,
+        Long publisherId,
+        Long categoryId,
         List<Float> embedding
 ) {}
