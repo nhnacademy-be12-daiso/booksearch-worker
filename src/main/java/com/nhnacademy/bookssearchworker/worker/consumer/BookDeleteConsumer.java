@@ -22,9 +22,9 @@ public class BookDeleteConsumer {
     private final EsBookDocumentClient es;
     private final RabbitRetryPublisher retryPublisher;
 
-    @Value("${rabbitmq.routing-key.book-delete-retry}")
+    @Value("${rabbitmq.routing.book-delete-retry}")
     private String RK_RETRY;
-    @Value("${rabbitmq.routing-key.book-delete-fail}")
+    @Value("${rabbitmq.routing.book-delete-fail}")
     private String RK_FAIL;
 
     @RabbitListener(queues = "${rabbitmq.queue.book-delete}", containerFactory = "rabbitListenerContainerFactory")

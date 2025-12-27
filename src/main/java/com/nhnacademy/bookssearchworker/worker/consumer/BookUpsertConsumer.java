@@ -31,9 +31,9 @@ public class BookUpsertConsumer {
     private final OllamaEmbeddingClient embeddingClient;
     private final RabbitRetryPublisher retryPublisher;
 
-    @Value("${rabbitmq.routing-key.book-upsert-retry}")
+    @Value("${rabbitmq.routing.book-upsert-retry}")
     private String RK_RETRY;
-    @Value("${rabbitmq.routing-key.book-upsert-fail}")
+    @Value("${rabbitmq.routing.book-upsert-fail}")
     private String RK_FAIL;
 
     @RabbitListener(queues = "${rabbitmq.queue.book-upsert}", containerFactory = "rabbitListenerContainerFactory")
@@ -70,7 +70,7 @@ public class BookUpsertConsumer {
             List<Float> vec = embeddingClient.embed(text);
             log.debug("[BOOK_UPSERT] embedding dim={}",vec.size());
 
-            // ✅ 핵심: ES에 빈 embedding(0차원) 보내지 못하게 차단
+            // 핵심: ES에 빈 embedding(0차원) 보내지 못하게 차단
             if (vec == null || vec.isEmpty()) {
                 throw new WorkerProcessingException(
                         WorkerProcessingException.ErrorCode.EMBEDDING_FAILED,
@@ -88,13 +88,15 @@ public class BookUpsertConsumer {
 
             BookUpsertDoc doc = new BookUpsertDoc(
                     isbn,
+                    book.id(),
                     book.title(),
                     book.author(),
                     book.publisher(),
                     book.description(),
                     book.pubDate(),
                     book.price(),
-                    book.imageUrl(), // ✅ BookUpsertDoc 필드명은 image_url이지만 record 생성자는 순서로 들어감
+                    book.categories(),
+                    book.imageUrl(),
                     vec
             );
 

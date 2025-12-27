@@ -1,6 +1,7 @@
 package com.nhnacademy.bookssearchworker.worker.message;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public record BookUpsertMessage(
         String requestId,
@@ -9,6 +10,7 @@ public record BookUpsertMessage(
         String reason
 ) {
     public record BookPayload(
+            Long id,
             String isbn,
             String title,
             String author,
@@ -16,6 +18,7 @@ public record BookUpsertMessage(
             String description,
             LocalDate pubDate,
             Integer price,
+            List<String> categories,
             String imageUrl
     ) {}
 }

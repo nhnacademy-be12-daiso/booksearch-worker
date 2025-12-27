@@ -61,15 +61,16 @@ rabbitmq:
     main: team3.booksearch.exchange
     retry: team3.booksearch.retry.dlx
     dlx: team3.booksearch.dlx
-
   queue:
     book-upsert: team3.booksearch.book.upsert.queue
     book-delete: team3.booksearch.book.delete.queue
 
-  routing-key:
+  routing:
+    book-upsert: team3.booksearch.book.upsert
     book-upsert-retry: team3.booksearch.book.upsert.retry
     book-upsert-fail: team3.booksearch.book.upsert.fail
 
+    book-delete: team3.booksearch.book.delete
     book-delete-retry: team3.booksearch.book.delete.retry
     book-delete-fail: team3.booksearch.book.delete.fail
 
