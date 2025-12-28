@@ -51,11 +51,6 @@ public class RabbitRetryPublisher {
         rabbitTemplate.send(dlxExchange, failRoutingKey, new Message(original.getBody(), props));
     }
 
-    // 메인 교환기로 메시지 발행
-    public void toMain(Message original, String routingKey) {
-        rabbitTemplate.send(mainExchange, routingKey, original);
-    }
-
     // 메시지의 재시도 횟수 조회
     public int getRetryCount(MessageProperties props) {
         if (props == null || props.getHeaders() == null) return 0;
@@ -67,22 +62,6 @@ public class RabbitRetryPublisher {
             try { return Integer.parseInt(s); } catch (Exception ignore) { return 0; }
         }
         return 0;
-    }
-
-    // 재시도 큐로 메시지 발행 (예외 정보 포함)
-    public void publishToRetry(Message original, String retryRoutingKey, int nextRetryCount, WorkerProcessingException ex) {
-        MessageProperties props = copyProperties(original.getMessageProperties());
-        props.getHeaders().put(HDR_RETRY_COUNT, nextRetryCount);
-        rabbitTemplate.send(retryExchange, retryRoutingKey, new Message(original.getBody(), props));
-    }
-
-    // DLQ로 메시지 발행 (예외 정보 포함)
-    public void publishToDlx(Message original, String failRoutingKey, int retryCount, WorkerProcessingException ex) {
-        MessageProperties props = copyProperties(original.getMessageProperties());
-        props.getHeaders().put(HDR_RETRY_COUNT, retryCount);
-        props.getHeaders().put(HDR_ERROR_CODE, ex.getErrorCode().name());
-        props.getHeaders().put(HDR_ERROR_MESSAGE, safeMsg(ex.getMessage()));
-        rabbitTemplate.send(dlxExchange, failRoutingKey, new Message(original.getBody(), props));
     }
 
     // 원하는 시간 지연 후 재시도 큐로 메시지 발행(TTL 활용)
