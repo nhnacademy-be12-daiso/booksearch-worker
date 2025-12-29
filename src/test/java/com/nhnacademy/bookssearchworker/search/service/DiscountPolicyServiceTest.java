@@ -90,7 +90,6 @@ class DiscountPolicyServiceTest {
 
         discountPolicyService.applyDiscounts(List.of(book));
 
-        // 20000 - floor(20000 * 0.15) = 17000, then -1000 = 16000
         assertThat(book.getDiscountedPrice()).isEqualTo(16000);
 
         then(redisTemplate).should().opsForValue();

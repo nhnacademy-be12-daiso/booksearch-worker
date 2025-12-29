@@ -24,13 +24,11 @@ class OllamaEmbeddingClientTest {
     private static OllamaEmbeddingClient newClientWithJsonResponse(String jsonBody, int expectedDim) {
         ExchangeFunction exchange = req -> Mono.just(jsonResponse(jsonBody));
         WebClient webClient = WebClient.builder()
-                // 상대경로(.uri("/..."))를 쓰므로 baseUrl 필요
                 .baseUrl("http://localhost")
                 .exchangeFunction(exchange)
                 .build();
 
         OllamaEmbeddingClient client = new OllamaEmbeddingClient(webClient);
-        // @Value 필드 테스트 주입
         ReflectionTestUtils.setField(client, "embeddingUrl", "/api/embeddings");
         ReflectionTestUtils.setField(client, "model", "test-model");
         ReflectionTestUtils.setField(client, "expectedDim", expectedDim);
@@ -90,16 +88,11 @@ class OllamaEmbeddingClientTest {
     @Test
     @DisplayName("embed: resp가 null이면 IllegalStateException")
     void embed_nullResponse_throws() {
-        // ExchangeFunction이 null을 반환하는 케이스를 만들기 어렵기 때문에,
-        // 동일 효과를 위해 body를 비워 Jackson 파싱이 실패하도록 만든다.
-        // (실제 코드에서 resp==null 분기를 커버하고 싶다면, WebClient를 deep stub으로 만들어야 하지만
-        // 현재 프로젝트에선 @MockitoBean(answer=...)가 불가하여, 외부통신 없는 방식으로 대체합니다.)
         String json = "null";
         OllamaEmbeddingClient client = newClientWithJsonResponse(json, 3);
 
         IllegalStateException ex = assertThrows(IllegalStateException.class, () -> client.embed("x"),
                 "응답이 null이면 예외가 나야 합니다.");
-        // 메시지는 구현에 따라 달라질 수 있어 contains로만 체크
         assertTrue(ex.getMessage() == null || ex.getMessage().toLowerCase().contains("embedding"),
                 "예외 메시지가 너무 예상과 다릅니다: " + ex.getMessage());
     }
@@ -134,7 +127,6 @@ class OllamaEmbeddingClientTest {
     @Test
     @DisplayName("embed: 알 수 없는 응답 스키마면 예외")
     void embed_unknownSchema_throws() {
-        // embedding/data 키가 없음
         String json = """
                 {"foo":"bar"}
                 """;
