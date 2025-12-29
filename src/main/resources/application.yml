@@ -86,6 +86,10 @@ app:
     reranker-url: http://reranker.java21.net/rerank
     gemini-api-key: AIzaSyAPjRTWLiLXhJBCiCKoCNi3aPVMNGkU4go
     gemini-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
+    timeout:
+      embedding-seconds: 60
+      rerank-seconds: 60
+      gemini-seconds: 120
   batch:
     size: 1000
 
