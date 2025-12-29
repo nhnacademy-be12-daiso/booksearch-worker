@@ -25,7 +25,6 @@ class WorkerConfigTest {
     void objectMapper_hasJavaTimeModule_andNoTimestamps() throws Exception {
         assertNotNull(objectMapper, "ObjectMapper bean should exist");
 
-        // JavaTimeModule이 없으면 LocalDate 직렬화에서 예외가 나거나 이상한 형태가 나올 수 있음
         String json = objectMapper.writeValueAsString(LocalDate.of(2025, 1, 2));
         assertEquals("\"2025-01-02\"", json, "WRITE_DATES_AS_TIMESTAMPS=false 이므로 ISO-8601 문자열이어야 함");
     }

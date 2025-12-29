@@ -54,7 +54,6 @@ class RerankingClientTest {
         String sent = docs.get(0);
         assertThat(sent).startsWith("제목 ");
         assertThat(sent).doesNotContain("<p>").doesNotContain("</p>").doesNotContain("<strong>");
-        // stripHtml()은 50자 제한이므로 전체 문자열 길이는 제목+공백+50 이하여야 함
         assertThat(sent.length()).isLessThanOrEqualTo("제목 ".length() + 50);
     }
 

@@ -38,7 +38,6 @@ class BookDeleteConsumerTest {
     @MockitoBean EsBookDocumentClient es;
     @MockitoBean RabbitRetryPublisher retryPublisher;
 
-    // consume() 파라미터로 들어오는 Channel도 @MockitoBean으로 준비해둔다 (Mockito.mock 금지 대응)
     @MockitoBean Channel channel;
 
     @Autowired
