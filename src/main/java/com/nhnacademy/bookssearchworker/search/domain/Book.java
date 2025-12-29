@@ -60,8 +60,7 @@ public class Book {
     @Field(type = FieldType.Integer)
     private Integer price;
 
-    // ES 필드명(book_vector)과 매핑
-    @Field(name = "book_vector", type = FieldType.Dense_Vector, dims = 1024, index = true)
+    @Field(name = "embedding", type = FieldType.Dense_Vector, dims = 1024, index = true)
     private List<Double> embedding;
 
     // ES 필드명(image_url)과 매핑
