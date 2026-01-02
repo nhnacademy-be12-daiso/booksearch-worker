@@ -35,3 +35,4 @@ build/
 ### Profile ###
 /src/main/resources/application-local.yml
 http/search.http
+data/sonarQube.png

@@ -16,7 +16,6 @@ class QueryPreprocessorTest {
         String input = "도움이 될만한 스프링 부트 책 추천해줘";
         String result = preprocessor.extractKeywords(input);
 
-        // "도움이 될만한", "책", "추천해줘" 제거 후 "스프링 부트"만 남는 형태를 기대
         assertThat(result).contains("스프링").contains("부트");
         assertThat(result).doesNotContain("도움").doesNotContain("추천");
         assertThat(result).doesNotContain("  ");
