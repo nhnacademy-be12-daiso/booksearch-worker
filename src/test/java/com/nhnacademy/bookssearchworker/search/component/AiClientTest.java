@@ -28,11 +28,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-/**
- * AiClient 테스트 (외부 통신 없음)
- * - WebClient 체인 모킹 대신 ExchangeFunction을 @MockitoBean으로 대체해 응답을 제어한다.
- * - AiClient의 동작은 "성공/실패/응답 포맷 이상/재시도"까지 커버한다.
- */
+
 @SpringBootTest(classes = {
         AiClient.class,
         AiClientTest.WebClientTestConfig.class
@@ -62,10 +58,6 @@ class AiClientTest {
     @TestConfiguration
     static class WebClientTestConfig {
 
-        /**
-         * WebClient를 ExchangeFunction 기반으로 구성.
-         * 이 ExchangeFunction 빈은 테스트에서 @MockitoBean으로 override 된다.
-         */
         @Bean
         ExchangeFunction exchangeFunction() {
             return request -> Mono.error(new IllegalStateException("ExchangeFunction mock is not configured"));
@@ -78,8 +70,6 @@ class AiClientTest {
                     .build();
         }
     }
-
-    // --------- helpers ---------
 
     private static ClientResponse okJson(String json) {
         return ClientResponse.create(HttpStatus.OK)
@@ -105,10 +95,7 @@ class AiClientTest {
         );
     }
 
-    // =========================
-    // 1) Embedding
-    // =========================
-
+    // Embedding 테스트
     @Nested
     @DisplayName("generateEmbedding()")
     class GenerateEmbeddingTests {
@@ -116,8 +103,6 @@ class AiClientTest {
         @Test
         @DisplayName("성공: embedding 리스트를 그대로 반환한다")
         void success_returnsEmbedding() {
-            // AiClient는 {"embedding":[...]}를 EmbeddingResponse(record)로 받음
-            // (generateEmbedding 로직) :contentReference[oaicite:2]{index=2}
             when(exchangeFunction.exchange(any(ClientRequest.class)))
                     .thenReturn(Mono.just(okJson("{\"embedding\":[0.1,0.2,0.3]}")));
 
@@ -127,14 +112,13 @@ class AiClientTest {
                     .as("성공 시 embedding 값이 비면 안 됨")
                     .containsExactly(0.1, 0.2, 0.3);
 
+            // 최초 1회 호출 기대
             verify(exchangeFunction, times(1)).exchange(any(ClientRequest.class));
         }
 
         @Test
         @DisplayName("응답 포맷 이상: embedding 필드가 없으면 emptyList()")
         void emptyBodyOrMissingField_returnsEmptyList() {
-            // {"embedding": null} 또는 {} -> response.embedding() == null 케이스
-            // (null/비어있음 처리) :contentReference[oaicite:3]{index=3}
             when(exchangeFunction.exchange(any(ClientRequest.class)))
                     .thenReturn(Mono.just(okJson("{}")));
 
@@ -144,6 +128,7 @@ class AiClientTest {
                     .as("embedding 필드가 없으면 emptyList 반환")
                     .isEmpty();
 
+            // 최초 1회 호출 기대
             verify(exchangeFunction, times(1)).exchange(any(ClientRequest.class));
         }
 
@@ -160,20 +145,19 @@ class AiClientTest {
                     .as("WebClientResponseException이면 emptyList로 복구해야 함")
                     .isEmpty();
 
+            // 최초 1회 + 재시도 2회 = 총 3회 호출 기대
             verify(exchangeFunction, times(3)).exchange(any(ClientRequest.class));
         }
 
         @Test
         @DisplayName("재시도: WebClientRequestException은 최대 2회 재시도 후 성공하면 성공 값 반환")
         void retryable_webClientRequestException_retriesAndSucceeds() {
-            // (retrySpec/isRetryable) :contentReference[oaicite:5]{index=5}
             AtomicInteger attempt = new AtomicInteger(0);
 
             when(exchangeFunction.exchange(any(ClientRequest.class)))
                     .thenAnswer(inv -> {
                         int n = attempt.getAndIncrement();
                         if (n < 2) {
-                            // isRetryable -> WebClientRequestException true :contentReference[oaicite:6]{index=6}
                             return Mono.error(new WebClientRequestException(
                                     new IOException("network"),
                                     HttpMethod.POST,
@@ -206,14 +190,12 @@ class AiClientTest {
                     .as("비재시도 예외는 emptyList로 복구")
                     .isEmpty();
 
+            // 최초 1회 호출 기대
             verify(exchangeFunction, times(1)).exchange(any(ClientRequest.class));
         }
     }
 
-    // =========================
-    // 2) Rerank
-    // =========================
-
+    // reranker 테스트
     @Nested
     @DisplayName("rerank()")
     class RerankTests {
@@ -221,7 +203,6 @@ class AiClientTest {
         @Test
         @DisplayName("성공: 결과 리스트를 그대로 반환한다")
         void success_returnsList() {
-            // (rerank 로직) :contentReference[oaicite:7]{index=7}
             when(exchangeFunction.exchange(any(ClientRequest.class)))
                     .thenReturn(Mono.just(okJson("[{\"score\":0.9,\"index\":0},{\"score\":0.1,\"index\":1}]")));
 
@@ -241,7 +222,6 @@ class AiClientTest {
         @Test
         @DisplayName("응답이 JSON null이면 response==null로 판단하고 emptyList()")
         void jsonNull_returnsEmptyList() {
-            // response == null 처리 :contentReference[oaicite:8]{index=8}
             when(exchangeFunction.exchange(any(ClientRequest.class)))
                     .thenReturn(Mono.just(okJson("null")));
 
@@ -257,7 +237,6 @@ class AiClientTest {
         @Test
         @DisplayName("WebClientResponseException: emptyList()로 복구한다")
         void webClientResponseException_returnsEmptyList() {
-            // (rerank 예외 처리) :contentReference[oaicite:9]{index=9}
             when(exchangeFunction.exchange(any(ClientRequest.class)))
                     .thenReturn(Mono.error(wcre(502, "bad gateway")));
 
@@ -270,7 +249,6 @@ class AiClientTest {
         @Test
         @DisplayName("onStatus 에러: 500 응답이면 emptyList()로 복구한다")
         void http5xx_response_returnsEmptyList() {
-            // retrieve().onStatus(...)로 RuntimeException 발생 :contentReference[oaicite:10]{index=10}
             when(exchangeFunction.exchange(any(ClientRequest.class)))
                     .thenReturn(Mono.just(errorJson(500, "{\"message\":\"err\"}")));
 
@@ -281,10 +259,7 @@ class AiClientTest {
         }
     }
 
-    // =========================
-    // 3) Gemini
-    // =========================
-
+    // Gemini 테스트
     @Nested
     @DisplayName("generateAnswer()")
     class GenerateAnswerTests {
@@ -292,7 +267,6 @@ class AiClientTest {
         @Test
         @DisplayName("성공: candidates[0].content.parts[0].text 반환")
         void success_returnsText() {
-            // (정상 포맷이면 text 반환) :contentReference[oaicite:11]{index=11}
             when(exchangeFunction.exchange(any(ClientRequest.class)))
                     .thenAnswer(inv -> {
                         ClientRequest req = inv.getArgument(0);

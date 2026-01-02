@@ -34,4 +34,5 @@ build/
 
 ### Profile ###
 /src/main/resources/application-local.yml
-http/search.http
+http
+data

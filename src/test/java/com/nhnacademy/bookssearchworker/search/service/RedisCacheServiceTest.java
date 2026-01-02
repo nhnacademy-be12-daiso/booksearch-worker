@@ -80,10 +80,6 @@ class RedisCacheServiceTest {
         assertThat(result).isNull();
     }
 
-    /**
-     * MockitoBean을 쓰되, nested mock(ValueOperations)을 만들지 않기 위해
-     * Proxy 기반의 간단 스텁을 사용한다.
-     */
     @SuppressWarnings("unchecked")
     private static ValueOperations<String, String> valueOpsStub(Map<String, String> store, Map<String, Duration> ttlStore) {
         return (ValueOperations<String, String>) Proxy.newProxyInstance(
