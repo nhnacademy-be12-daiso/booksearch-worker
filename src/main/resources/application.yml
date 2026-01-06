@@ -84,7 +84,7 @@ app:
     embedding-url: http://ollama.java21.net/api/embeddings
     embedding-model: bge-m3
     reranker-url: http://reranker.java21.net/rerank
-    gemini-api-key: AIzaSyAPjRTWLiLXhJBCiCKoCNi3aPVMNGkU4go
+    gemini-api-key: ${GEMINI_API_KEY}
     gemini-url: https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent
     timeout:
       embedding-seconds: 60
