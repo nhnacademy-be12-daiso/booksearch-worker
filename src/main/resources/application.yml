@@ -14,18 +14,18 @@ spring:
         default-requeue-rejected: false
 
   elasticsearch:
-    uris: ${SPRING_ELASTICSEARCH_URIS:http://s4.java21.net:9200}
-    username: ${SPRING_ELASTICSEARCH_USERNAME:elastic}
-    password: ${SPRING_ELASTICSEARCH_PASSWORD:nhnacademy123!}
+    uris: ${SPRING_ELASTICSEARCH_URIS}
+    username: ${SPRING_ELASTICSEARCH_USERNAME}
+    password: ${SPRING_ELASTICSEARCH_PASSWORD}
     socket-timeout: 60s
     connection-timeout: 5s
 
   data:
     redis:
-      host: ${SPRING_REDIS_HOST:s4.java21.net}
-      port: ${SPRING_REDIS_PORT:6379}
+      host: ${SPRING_DATA_REDIS_HOST}
+      port: ${SPRING_DATA_REDIS_PORT}
       password: ${SPRING_REDIS_PASSWORD}
-      database: ${SPRING_REDIS_DATABASE:379}
+      database: ${BOOK_SPRING_DATA_REDIS_DATABASE}
 
   datasource:
     url: ${SPRING_DATASOURCE_URL}
