@@ -98,3 +98,15 @@ logging:
     org.springframework.amqp: INFO
     org.springframework.amqp.rabbit.listener: INFO
     org.springframework.web.reactive.function.client: INFO
+
+springdoc:
+  api-docs:
+    path: /api/search/v3/api-docs
+  swagger-ui:
+    path: /api/search/swagger-ui.html
+    config-url: /api/search/v3/api-docs/swagger-config
+    url: /api/search/v3/api-docs
+    disable-swagger-default-url: true
+
+server:
+  forward-headers-strategy: framework
